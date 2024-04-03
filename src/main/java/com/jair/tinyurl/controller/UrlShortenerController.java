@@ -25,6 +25,12 @@ public class UrlShortenerController {
         return ResponseEntity.ok(urlShortenerService.getAllUrl());
     }
 
+    @GetMapping("/deleteall")
+    public ResponseEntity<String> deleteAll(){
+        urlShortenerService.deleteAll();
+        return ResponseEntity.ok("Deleted all urls");
+    }
+
     @GetMapping("/snip")
     public ResponseEntity<UrlDto> snip(){
         String urlToBeShortened = "https://www.google.com";

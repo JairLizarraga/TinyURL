@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface UrlShortenerService {
 
     public List<Url> getAllUrl();
+    public void deleteAll();
 
     public Url createUrl(String apiDevKey, String originalUrl, String customAlias, String userName, String expireDate);
 

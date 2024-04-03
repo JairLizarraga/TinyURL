@@ -1,7 +1,6 @@
 package com.jair.tinyurl.service.impl;
 
 import com.jair.tinyurl.model.Url;
-import com.jair.tinyurl.model.dto.UrlDto;
 import com.jair.tinyurl.repository.UrlRepository;
 import com.jair.tinyurl.service.UrlShortenerService;
 import org.springframework.stereotype.Service;
@@ -21,24 +20,6 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
         this.urlRepository = urlRepository;
     }
 
-    public String getUniqueHashCodeFromUrl(String originalUrl){
-        String hashCode;
-        Optional<Url> urlInDatabase;
-        Integer increaseSequenceForUniqueness = 0;
-
-        do{
-            hashCode = Integer.toString(originalUrl.hashCode());
-            urlInDatabase = urlRepository.findByHash(hashCode);
-            originalUrl += Integer.toString(increaseSequenceForUniqueness++);
-        } while (urlInDatabase.isPresent());
-
-        return hashCode;
-    }
-
-    private String getShortCode(String hashCode){
-        String encodedUrl = Base64.getEncoder().encodeToString(hashCode.getBytes());
-        return encodedUrl.substring(0, 6);
-    }
 
     public List<Url> getAllUrl(){
         Iterable<Url> all = urlRepository.findAll();
@@ -46,14 +27,35 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
         all.forEach(urlList::add);
         return urlList;
     }
-    
+
+    public void deleteAll(){
+        urlRepository.deleteAll();
+    }
+
+
+    private String generateShortUrl(String originalUrl) {
+        String hashCode;
+        Optional<Url> urlInDatabase;
+        int increaseSequenceForUniqueness = 0;
+        String encodedUrl;
+
+        do {
+            hashCode = Integer.toString((increaseSequenceForUniqueness + originalUrl).hashCode());
+            encodedUrl = Base64.getEncoder().encodeToString(hashCode.getBytes()).substring(0, 6);
+            urlInDatabase = urlRepository.findByHash(encodedUrl);
+            increaseSequenceForUniqueness++;
+        } while (urlInDatabase.isPresent());
+
+
+        return encodedUrl;
+    }
+
     @Override
     public Url createUrl(String apiDevKey, String originalUrl, String customAlias, String userName, String expireDate) {
-        String uniqueHashCodeFromUrl = getUniqueHashCodeFromUrl(originalUrl);
-        String shortUrl = getShortCode(uniqueHashCodeFromUrl);
+        String uniqueHashCodeFromUrl = generateShortUrl(originalUrl);
 
         Url urlShortened = Url.builder()
-            .hash(shortUrl)
+            .hash(uniqueHashCodeFromUrl)
             .originalUrl(originalUrl)
             .creationDate(LocalDateTime.now())
             .expirationDate(LocalDateTime.now().plusYears(1))
