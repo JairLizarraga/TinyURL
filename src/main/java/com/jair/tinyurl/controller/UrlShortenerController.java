@@ -2,14 +2,11 @@ package com.jair.tinyurl.controller;
 
 import com.jair.tinyurl.model.Url;
 import com.jair.tinyurl.model.dto.UrlDto;
+import com.jair.tinyurl.model.dto.UrlShortenRequest;
 import com.jair.tinyurl.service.UrlShortenerService;
-import com.jair.tinyurl.service.impl.UrlShortenerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,21 +28,33 @@ public class UrlShortenerController {
         return ResponseEntity.ok("Deleted all urls");
     }
 
-    @GetMapping("/snip")
-    public ResponseEntity<UrlDto> snip(){
-        String urlToBeShortened = "https://www.google.com";
+    @PostMapping("/snip")
+    public ResponseEntity<UrlDto> snip(@RequestBody UrlShortenRequest request){
+        String apiDevKey = request.getApiDevKey();
+        String urlToBeShortened = request.getUrlToBeShortened();
+        String customAlias = request.getCustomAlias();
+        String userName = request.getUserName();
+        String expireDate = request.getExpireDate();
+
+
         String baseUrl = "https://www.tinyurl.com/";
 
-        Url urlShortened = urlShortenerService.createUrl("a", urlToBeShortened, "a", "a", "a");
+        Url urlShortened = urlShortenerService.createUrl(apiDevKey, urlToBeShortened, customAlias, userName, expireDate);
 
-        UrlDto url = UrlDto.builder()
+        UrlDto urlResponse = UrlDto.builder()
                 .shortUrl(baseUrl + urlShortened.getHash())
                 .originalUrl(urlShortened.getOriginalUrl())
                 .creationDate(urlShortened.getCreationDate())
                 .expirationDate(urlShortened.getExpirationDate())
                 .build();
 
-        return ResponseEntity.ok(url);
+        return ResponseEntity.ok(urlResponse);
+    }
+
+    @DeleteMapping("/delete/{urlKey}")
+    public ResponseEntity<String> deleteShortUrl(@PathVariable String urlKey){
+        String asd = urlShortenerService.deleteUrl("asd", urlKey);
+        return ResponseEntity.ok(asd);
     }
 
 
