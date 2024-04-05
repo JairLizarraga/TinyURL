@@ -57,6 +57,11 @@ public class UrlShortenerController {
         return ResponseEntity.ok(asd);
     }
 
+    @GetMapping("/geturl/{customAlias}")
+    public ResponseEntity<String> getOriginalUrl(@PathVariable String urlKey){
+        String originalUrl = urlShortenerService.getOriginalUrl(urlKey);
+        return ResponseEntity.ok(originalUrl);
+    }
 
 
 }

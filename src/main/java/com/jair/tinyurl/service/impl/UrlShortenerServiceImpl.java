@@ -23,6 +23,25 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
     }
 
     @Override
+    public String deleteUrl(String apiDevKey, String urlKey) {
+        Optional<Url> byHash = urlRepository.findById(urlKey);
+        if(byHash.isEmpty())
+            throw new UrlKeyNotFoundException(urlKey);
+        urlRepository.deleteById(urlKey);
+        return urlKey + " deleted successfully";
+    }
+
+    @Override
+    public String getOriginalUrl(String urlKey) {
+        Optional<Url> byId = urlRepository.findById(urlKey);
+        if(byId.isEmpty())
+            throw new UrlKeyNotFoundException(urlKey);
+
+        return byId.get().getOriginalUrl();
+    }
+
+
+    @Override
     public Url createUrl(String apiDevKey, String originalUrl, String customAlias, String userName, String expireDate) {
         String uniqueHashCodeFromUrl = getUniqueHashCode(originalUrl, customAlias);
 
@@ -77,13 +96,5 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
         urlRepository.deleteAll();
     }
 
-    @Override
-    public String deleteUrl(String apiDevKey, String urlKey) {
-        Optional<Url> byHash = urlRepository.findById(urlKey);
-        if(byHash.isEmpty())
-            throw new UrlKeyNotFoundException(urlKey);
-        urlRepository.deleteById(urlKey);
-        return urlKey + " deleted successfully";
-    }
     
 }

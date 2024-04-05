@@ -13,4 +13,6 @@ public interface UrlShortenerService {
 
     String deleteUrl(String apiDevKey, String urlKey);
 
+    String getOriginalUrl(String urlKey);
+
 }
