@@ -1,6 +1,7 @@
 package com.jair.tinyurl.service.impl;
 
 import com.jair.tinyurl.exception.CustomAliasAlreadyExistsException;
+import com.jair.tinyurl.exception.InvalidCustomAliasException;
 import com.jair.tinyurl.exception.UrlKeyNotFoundException;
 import com.jair.tinyurl.model.Url;
 import com.jair.tinyurl.repository.UrlRepository;
@@ -52,18 +53,21 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
                 .expirationDate(LocalDateTime.now().plusYears(1))
                 .build();
 
-        urlRepository.save(urlShortened);
-        return urlShortened;
+        return urlRepository.save(urlShortened);
     }
 
     public String getUniqueHashCode(String originalUrl, String customAlias){
-        if(customAlias != null){
-            if(isAliasAvailable(customAlias))
-                return customAlias;
-            throw new CustomAliasAlreadyExistsException(customAlias);
-        } else {
+
+        if(customAlias == null)
             return generateShortUrl(originalUrl);
-        }
+
+        if(customAlias.length() < 4)
+            throw new InvalidCustomAliasException(customAlias, "Custom alias length must be at least 4 characters.");
+
+        if(!isAliasAvailable(customAlias))
+            throw new CustomAliasAlreadyExistsException(customAlias);
+
+        return customAlias;
     }
 
     private String generateShortUrl(String originalUrl) {
